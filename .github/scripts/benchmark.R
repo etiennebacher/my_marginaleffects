@@ -6,11 +6,7 @@ library(tidyr)
 pr_number <- Sys.getenv("PR_NUMBER")
 
 out <- cross::run(
-  pkgs = c(
-    "my_marginaleffects",
-    "vincentarelbundock/my_marginaleffects",
-    paste0("vincentarelbundock/my_marginaleffects#", pr_number)
-  ),
+  pkgs = "my_marginaleffects",
   ~ {
     library(my_marginaleffects)
     library(data.table)
