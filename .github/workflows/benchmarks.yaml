@@ -12,6 +12,7 @@ on:
       - 'R/**'
       - 'src/**'
       - '.github/scripts/**'
+      - '.github/workflow/benchmarks.yaml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
