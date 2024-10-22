@@ -66,6 +66,6 @@ jobs:
       - name: Add comment containing benchmark results 
         uses: thollander/actions-comment-pull-request@v3
         with:
-          filePath: /report.md
+          file-path: /report.md
           comment-tag: "Download link"  
           github-token: ${{ secrets.GITHUB_TOKEN }}
