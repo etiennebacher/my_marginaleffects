@@ -8,7 +8,7 @@ pr_number <- Sys.getenv("PR_NUMBER")
 out <- cross::run(
   pkgs = "marginaleffects",
   ~ {
-    library(my_marginaleffects)
+    library(marginaleffects)
     library(data.table)
 
     bench::press(
