@@ -62,6 +62,10 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            [![Comparison Plot](./.github/scripts/benchmark_result.png)](./.github/scripts/benchmark_result.png)\nGenerated via commit ${{ github.event.pull_request.head.sha }}\nDownload link for the artifact containing the test results: [↓ benchmark-results.zip](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }})
+            [![Comparison Plot](./.github/scripts/benchmark_result.png)](./.github/scripts/benchmark_result.png)
+            
+            Generated via commit ${{ github.event.pull_request.head.sha }}
+            
+            Download link for the artifact containing the test results: [↓ benchmark-results.zip](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.artifact-upload-step.outputs.artifact-id }})
           comment-tag: "Download link"  
           github-token: ${{ secrets.GITHUB_TOKEN }}
