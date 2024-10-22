@@ -1,0 +1,18 @@
+#' @section Standard errors using the delta method:
+#'
+#' Standard errors for all quantities estimated by `my_marginaleffects` can be obtained via the delta method. This requires differentiating a function with respect to the coefficients in the model using a finite difference approach. In some models, the delta method standard errors can be sensitive to various aspects of the numeric differentiation strategy, including the step size. By default, the step size is set to `1e-8`, or to `1e-4` times the smallest absolute model coefficient, whichever is largest.
+#'
+#' `my_marginaleffects` can delegate numeric differentiation to the `numDeriv` package, which allows more flexibility. To do this, users can pass arguments to the `numDeriv::jacobian` function through a global option. For example:
+#' 
+#' - `options(my_marginaleffects_numDeriv = list(method = "simple", method.args = list(eps = 1e-6)))`
+#' - `options(my_marginaleffects_numDeriv = list(method = "Richardson", method.args = list(eps = 1e-5)))`
+#' - `options(my_marginaleffects_numDeriv = NULL)`
+#'
+#' See the "Standard Errors and Confidence Intervals" vignette on the `my_marginaleffects` website for more details on the computation of standard errors:
+#'
+#' https://my_marginaleffects.com/vignettes/uncertainty.html
+#'
+#' Note that the `inferences()` function can be used to compute uncertainty estimates using a bootstrap or simulation-based inference. See the vignette:
+#' 
+#' https://my_marginaleffects.com/vignettes/bootstrap.html
+#'

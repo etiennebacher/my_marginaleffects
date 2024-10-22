@@ -1,0 +1,28 @@
+#' @section Parallel computation:
+#'
+#' The `slopes()` and `comparisons()` functions can use parallelism to
+#' speed up computation. Operations are parallelized for the computation of 
+#' standard errors, at the model coefficient level. There is always 
+#' considerable overhead when using parallel computation, mainly involved
+#' in passing the whole dataset to the different processes. Thus, parallel
+#' computation is most likely to be useful when the model includes many parameters
+#' and the dataset is relatively small.
+#' 
+#' Warning: In many cases, parallel processing will not be useful at all.
+#'
+#' To activate parallel computation, users must load the `future.apply` package,
+#' call `plan()` function, and set a global option. For example:
+#'
+#' ```{r, eval = FALSE}
+#' library(future.apply)
+#' plan("multicore", workers = 4)
+#' options(my_marginaleffects_parallel = TRUE)
+#'
+#' slopes(model)
+#' ```
+#'
+#' To disable parallelism in `my_marginaleffects` altogether, you can set a global option:
+#' 
+#' ```{r, eval = FALSE}
+#' options(my_marginaleffects_parallel = FALSE)
+#' ```

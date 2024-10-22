@@ -1,0 +1,17 @@
+requiet("logitr")
+requiet("my_marginaleffects")
+
+mod <- suppressMessages(logitr(
+    data    = yogurt,
+    outcome = "choice",
+    obsID   = "obsID",
+    pars    = c("price", "feat", "brand")))
+
+p <- predictions(mod)
+expect_inherits(p, "predictions")
+
+mfx <- slopes(mod)
+expect_inherits(mfx, "my_marginaleffects")
+
+cmp <- comparisons(mod)
+expect_inherits(cmp, "comparisons")
