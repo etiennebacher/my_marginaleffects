@@ -6,13 +6,9 @@ library(tidyr)
 pr_number <- Sys.getenv("PR_NUMBER")
 
 out <- cross::run(
-  pkgs = c(
-    "my_marginaleffects",
-    "vincentarelbundock/my_marginaleffects",
-    paste0("vincentarelbundock/my_marginaleffects#", pr_number)
-  ),
+  pkgs = "marginaleffects",
   ~ {
-    library(my_marginaleffects)
+    library(marginaleffects)
     library(data.table)
 
     bench::press(
@@ -32,7 +28,7 @@ out <- cross::run(
           # 26 variables; no standard error
           slopes(mod, vcov = FALSE),
           # 26 variables
-          my_marginaleffects::slopes(mod),
+          marginaleffects::slopes(mod),
           check = FALSE,
           iterations = 5
         )
@@ -45,9 +41,9 @@ unnested <- out |>
   mutate(
     pkg = case_match(
       pkg,
-      "my_marginaleffects" ~ "CRAN",
-      "vincentarelbundock/my_marginaleffects" ~ "main",
-      paste0("vincentarelbundock/my_marginaleffects#", pr_number) ~ "PR"
+      "marginaleffects" ~ "CRAN",
+      "vincentarelbundock/marginaleffects" ~ "main",
+      paste0("vincentarelbundock/marginaleffects#", pr_number) ~ "PR"
     )
   ) |>
   unnest(result) |>
