@@ -6,7 +6,7 @@ library(tidyr)
 pr_number <- Sys.getenv("PR_NUMBER")
 
 out <- cross::run(
-  pkgs = "marginaleffects",
+  pkgs = c("vincentarelbundock/marginaleffects", "vincentarelbundock/marginaleffects#1246"),
   ~ {
     library(marginaleffects)
     library(data.table)
@@ -41,38 +41,37 @@ unnested <- out |>
   mutate(
     pkg = case_match(
       pkg,
-      "marginaleffects" ~ "CRAN",
       "vincentarelbundock/marginaleffects" ~ "main",
-      paste0("vincentarelbundock/marginaleffects#", pr_number) ~ "PR"
+      "vincentarelbundock/marginaleffects#1246" ~ "PR"
     )
   ) |>
   unnest(result) |>
-  mutate(expression = as.character(expression))
+  mutate(
+    expression = as.character(expression),
+    # Get duration in seconds
+    median = round(as.numeric(median), 3),
+    # Get memory in MB
+    mem_alloc = round(as.numeric(mem_alloc) / 1000000, 3)
+  ) |>
+  select(pkg, expression, median, mem_alloc)
 
-plot_result <- ggplot(unnested, aes(N, median, color = pkg, linetype = pkg)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(
-    ~expression,
-    labeller = labeller(expression = label_wrap_gen(width = 25)),
-    scales = "free_y"
-  ) +
-  labs(
-    y = "Median time (s)",
-    color = "Package version",
-    linetype = "Package version"
-  ) +
-  theme_light() +
-  theme(
-    strip.text = element_text(color = "white", size = 10),
-    strip.background = element_rect(
-      fill = "#24478f", linetype = "solid",
-      color = "black", linewidth = 1
-    ),
-    legend.position = "bottom"
+final <- unnested |>
+  pivot_wider(
+    id_cols = expression,
+    names_from = pkg,
+    values_from = c(median, mem_alloc)
+  ) |>
+  mutate(
+    median_diff_main_pr = round((median_PR - median_main) / median_main * 100, 2),
+    median_PR = paste0(median_PR, " (", median_diff_main_pr, "%)"),
+    mem_alloc_diff_main_pr = round((mem_alloc_PR - mem_alloc_main) / mem_alloc_main * 100, 2),
+    mem_alloc_PR = paste0(mem_alloc_PR, " (", mem_alloc_diff_main_pr, "%)")
+  ) |>
+  select(
+    Expression = expression,
+    `Median time with PR (% change with main)` = median_PR,
+    `Memory used with PR (% change with main)` = mem_alloc_PR
   )
 
-ggsave(
-  plot = plot_result,
-  ".github/scripts/benchmark_result.png"
-)
+tt(final) |>
+  save_tt("report.md")
