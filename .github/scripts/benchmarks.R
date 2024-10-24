@@ -1,6 +1,6 @@
 library(dplyr)
-library(ggplot2)
 library(tidyr)
+library(tinytable)
 
 # Stored in the Github actions workflow
 pr_number <- Sys.getenv("PR_NUMBER")
