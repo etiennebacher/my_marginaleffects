@@ -40,6 +40,9 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Pandoc setup
+        uses: r-lib/actions/setup-pandoc@v2
+
       - name: Install required dependencies for benchmark
         run: |
           install.packages(c("remotes", "bench", "dplyr", "pandoc", "tidyr", "tinytable"))
