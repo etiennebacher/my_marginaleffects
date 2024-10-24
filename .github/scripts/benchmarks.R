@@ -84,6 +84,7 @@ raw_table <- tt(final) |>
   save_tt("gfm")
 
 paste0(
+  "**Benchmark results**\n",
   "<details>\n<summary>Click to see benchmark results</summary>",
   raw_table,
   "\n</details>"
