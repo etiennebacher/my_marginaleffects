@@ -12,7 +12,7 @@ out <- cross::run(
     library(data.table)
 
     bench::press(
-      N = c(50000),
+      N = c(75000),
       {
         dat <- data.frame(matrix(rnorm(N * 26), ncol = 26))
         mod <- lm(X1 ~ ., dat)
@@ -21,17 +21,11 @@ out <- cross::run(
           iterations = 5,
 
           # Slopes =========================================
-          # marginal effects at the mean; no standard error
           slopes(mod, vcov = FALSE, newdata = "mean"),
-          # marginal effects at the mean
           slopes(mod, newdata = "mean"),
-          # 1 variable; no standard error
           slopes(mod, vcov = FALSE, variables = "X3"),
-          # 1 variable
           slopes(mod, variables = "X3"),
-          # 26 variables; no standard error
           slopes(mod, vcov = FALSE),
-          # 26 variables
           slopes(mod),
 
           # Hypothesis =========================================
@@ -87,8 +81,8 @@ final <- unnested |>
   ) |>
   select(
     Expression = expression,
-    `Median time with PR (% change with main)` = median_PR,
-    `Memory used with PR (% change with main)` = mem_alloc_PR
+    `Median time with PR (% change with main), seconds` = median_PR,
+    `Memory used with PR (% change with main), MB` = mem_alloc_PR
   )
 
 raw_table <- tt(final) |>
