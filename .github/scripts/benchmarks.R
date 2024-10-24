@@ -17,6 +17,10 @@ out <- cross::run(
         dat <- data.frame(matrix(rnorm(N * 26), ncol = 26))
         mod <- lm(X1 ~ ., dat)
         bench::mark(
+          check = FALSE,
+          iterations = 5,
+
+          # Slopes =========================================
           # marginal effects at the mean; no standard error
           slopes(mod, vcov = FALSE, newdata = "mean"),
           # marginal effects at the mean
@@ -28,9 +32,12 @@ out <- cross::run(
           # 26 variables; no standard error
           slopes(mod, vcov = FALSE),
           # 26 variables
-          marginaleffects::slopes(mod),
-          check = FALSE,
-          iterations = 5
+          slopes(mod),
+
+          # Hypothesis =========================================
+          hypotheses(mod, hypothesis = "b3 - b1 = 0"),
+          hypotheses(mod, hypothesis = "b2^2 * exp(b1) = 0"),
+          hypotheses(mod, hypothesis = ~reference)
         )
       }
     )
@@ -73,6 +80,12 @@ final <- unnested |>
     `Memory used with PR (% change with main)` = mem_alloc_PR
   )
 
-tt(final) |>
-  save_tt("gfm") |>
+raw_table <- tt(final) |>
+  save_tt("gfm")
+
+paste0(
+  "<details>\n<summary>Click to see benchmark results</summary>",
+  raw_table,
+  "\n</details>"
+) |>
   writeLines("report.md")
