@@ -74,4 +74,5 @@ final <- unnested |>
   )
 
 tt(final) |>
-  save_tt("report.md")
+  save_tt("gfm") |>
+  writeLines("report.md")
