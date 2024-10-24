@@ -12,10 +12,24 @@ out <- cross::run(
     library(data.table)
 
     bench::press(
-      N = c(50000),
+      N = 75000,
       {
         dat <- data.frame(matrix(rnorm(N * 26), ncol = 26))
         mod <- lm(X1 ~ ., dat)
+
+        set.seed(1234)
+        dat2 <- data.frame(
+          outcome = sample(0:1, N, TRUE),
+          incentive = runif(N),
+          agecat = sample(c("18-35", "35-60", "60+"), N, TRUE),
+          distance = sample(0:10000, N, TRUE)
+        )
+
+        mod2 <- glm(outcome ~ incentive * (agecat + distance),
+          data = dat2, family = binomial
+        )
+        grid <- data.frame(distance = 2, agecat = "18-35", incentive = 1)
+
         bench::mark(
           check = FALSE,
           iterations = 5,
@@ -31,7 +45,18 @@ out <- cross::run(
           # Hypothesis =========================================
           hypotheses(mod, hypothesis = "b3 - b1 = 0"),
           hypotheses(mod, hypothesis = "b2^2 * exp(b1) = 0"),
-          hypotheses(mod, hypothesis = ~reference)
+          hypotheses(mod, hypothesis = ~reference),
+
+          # Predictions =========================================
+          predictions(mod),
+          predictions(mod, newdata = "mean"),
+          predictions(mod, newdata = datagrid(X2 = unique)),
+
+          # Comparisons =========================================
+          comparisons(mod2),
+          comparisons(mod2, comparison = "dydxavg"),
+          comparisons(mod2, comparison = "eydxavg"),
+          comparisons(mod2, comparison = "ratioavg")
         )
       }
     )
