@@ -32,7 +32,7 @@ out <- cross::run(
 
         bench::mark(
           check = FALSE,
-          iterations = 5,
+          iterations = 10,
 
           # Slopes =========================================
           slopes(mod, vcov = FALSE, newdata = "mean"),
