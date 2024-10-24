@@ -6,7 +6,11 @@ library(tinytable)
 pr_number <- Sys.getenv("PR_NUMBER")
 
 out <- cross::run(
-  pkgs = c("vincentarelbundock/marginaleffects", "vincentarelbundock/marginaleffects#1246"),
+  pkgs = c(
+    "marginaleffects",
+    "vincentarelbundock/marginaleffects",
+    "vincentarelbundock/marginaleffects#1246"
+  ),
   ~ {
     library(marginaleffects)
     library(data.table)
@@ -32,7 +36,7 @@ out <- cross::run(
 
         bench::mark(
           check = FALSE,
-          iterations = 20,
+          iterations = 30,
 
           # Slopes =========================================
           slopes(mod, vcov = FALSE, newdata = "mean"),
@@ -67,6 +71,7 @@ unnested <- out |>
   mutate(
     pkg = case_match(
       pkg,
+      "marginaleffects" ~ "CRAN",
       "vincentarelbundock/marginaleffects" ~ "main",
       "vincentarelbundock/marginaleffects#1246" ~ "PR"
     )
@@ -88,26 +93,46 @@ final <- unnested |>
     values_from = c(median, mem_alloc)
   ) |>
   mutate(
+    # Compute change in time and memory between PR and main branch
     median_diff_main_pr = round((median_PR - median_main) / median_main * 100, 2),
-    median_PR = case_when(
-      median_diff_main_pr >= 2 ~ paste0(
+    median_main_PR = case_when(
+      median_diff_main_pr >= 5 ~ paste0(
         ":collision: ", median_PR, " (", median_diff_main_pr, "%)"
       ),
-      median_diff_main_pr < 2 & median_diff_main_pr > -2 ~ paste0(
+      median_diff_main_pr < 5 & median_diff_main_pr > -5 ~ paste0(
         median_PR, " (", median_diff_main_pr, "%)"
       ),
-      median_diff_main_pr <= -2 ~ paste0(
+      median_diff_main_pr <= -5 ~ paste0(
         ":zap: ", median_PR, " (", median_diff_main_pr, "%)"
       ),
       .default = NA
     ),
     mem_alloc_diff_main_pr = round((mem_alloc_PR - mem_alloc_main) / mem_alloc_main * 100, 2),
-    mem_alloc_PR = paste0(mem_alloc_PR, " (", mem_alloc_diff_main_pr, "%)")
+    mem_alloc_main_PR = paste0(mem_alloc_PR, " (", mem_alloc_diff_main_pr, "%)"),
+
+    # Compute change in time and memory between PR and CRAN
+    median_diff_CRAN_pr = round((median_PR - median_CRAN) / median_CRAN * 100, 2),
+    median_CRAN_PR = case_when(
+      median_diff_CRAN_pr >= 5 ~ paste0(
+        ":collision: ", median_PR, " (", median_diff_CRAN_pr, "%)"
+      ),
+      median_diff_CRAN_pr < 5 & median_diff_CRAN_pr > -5 ~ paste0(
+        median_PR, " (", median_diff_CRAN_pr, "%)"
+      ),
+      median_diff_CRAN_pr <= -5 ~ paste0(
+        ":zap: ", median_PR, " (", median_diff_CRAN_pr, "%)"
+      ),
+      .default = NA
+    ),
+    mem_alloc_diff_CRAN_pr = round((mem_alloc_PR - mem_alloc_CRAN) / mem_alloc_CRAN * 100, 2),
+    mem_alloc_CRAN_PR = paste0(mem_alloc_diff_CRAN_pr, " (", mem_alloc_diff_CRAN_pr, "%)")
   ) |>
   select(
     Expression = expression,
-    `Median time with PR (% change with main), seconds` = median_PR,
-    `Memory used with PR (% change with main), MB` = mem_alloc_PR
+    `Median time with PR (% change with main), seconds` = median_main_PR,
+    `Memory used with PR (% change with main), MB` = mem_alloc_main_PR,
+    `Median time with PR (% change with CRAN), seconds` = median_CRAN_PR,
+    `Memory used with PR (% change with CRAN), MB` = mem_alloc_CRAN_PR
   )
 
 raw_table <- tt(final) |>
@@ -115,8 +140,8 @@ raw_table <- tt(final) |>
 
 paste0(
   "**Benchmark results**\n\n",
-  ":collision: means that PR is more than 2% slower than main\n",
-  ":zap: means that PR is more than 2% faster than main\n",
+  ":collision: means that PR is more than 5% slower than main\n",
+  ":zap: means that PR is more than 5% faster than main\n",
   "<details>\n<summary>Click to see benchmark results</summary>\n\n",
   raw_table,
   "\n\n</details>"
