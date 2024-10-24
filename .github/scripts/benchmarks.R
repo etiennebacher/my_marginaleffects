@@ -70,7 +70,18 @@ final <- unnested |>
   ) |>
   mutate(
     median_diff_main_pr = round((median_PR - median_main) / median_main * 100, 2),
-    median_PR = paste0(median_PR, " (", median_diff_main_pr, "%)"),
+    median_PR = case_when(
+      median_diff_main_pr >= 2 ~ paste0(
+        ":collision: ", median_PR, " (", median_diff_main_pr, "%)"
+      ),
+      median_diff_main_pr < 2 & median_diff_main_pr > -2 ~ paste0(
+        median_PR, " (", median_diff_main_pr, "%)"
+      ),
+      median_diff_main_pr <= -2 ~ paste0(
+        ":zap: ", median_PR, " (", median_diff_main_pr, "%)"
+      ),
+      .default = NA
+    ),
     mem_alloc_diff_main_pr = round((mem_alloc_PR - mem_alloc_main) / mem_alloc_main * 100, 2),
     mem_alloc_PR = paste0(mem_alloc_PR, " (", mem_alloc_diff_main_pr, "%)")
   ) |>
@@ -84,9 +95,11 @@ raw_table <- tt(final) |>
   save_tt("gfm")
 
 paste0(
-  "**Benchmark results**\n",
-  "<details>\n<summary>Click to see benchmark results</summary>",
+  "**Benchmark results**\n\n",
+  ":collision: means that PR is more than 2% slower than main\n",
+  ":zap: means that PR is more than 2% faster than main\n",
+  "<details>\n<summary>Click to see benchmark results</summary>\n\n",
   raw_table,
-  "\n</details>"
+  "\n\n</details>"
 ) |>
   writeLines("report.md")
